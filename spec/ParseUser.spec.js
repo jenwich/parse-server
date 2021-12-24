@@ -28,7 +28,7 @@ function verifyACL(user) {
 }
 
 describe('Parse.User testing', () => {
-  it('user sign up class method', async done => {
+  it('user sign up class method', async (done) => {
     const user = await Parse.User.signUp('asdf', 'zxcv');
     ok(user.getSessionToken());
     done();
@@ -42,7 +42,7 @@ describe('Parse.User testing', () => {
     ok(user.getSessionToken());
   });
 
-  it('user login wrong username', async done => {
+  it('user login wrong username', async (done) => {
     await Parse.User.signUp('asdf', 'zxcv');
     try {
       await Parse.User.logIn('non_existent_user', 'asdf3');
@@ -53,7 +53,7 @@ describe('Parse.User testing', () => {
     }
   });
 
-  it('user login wrong password', async done => {
+  it('user login wrong password', async (done) => {
     await Parse.User.signUp('asdf', 'zxcv');
     try {
       await Parse.User.logIn('asdf', 'asdfWrong');
@@ -64,7 +64,7 @@ describe('Parse.User testing', () => {
     }
   });
 
-  it('user login with non-string username with REST API', async done => {
+  it('user login with non-string username with REST API', async (done) => {
     await Parse.User.signUp('asdf', 'zxcv');
     request({
       method: 'POST',
@@ -80,11 +80,11 @@ describe('Parse.User testing', () => {
         password: 'zxcv',
       },
     })
-      .then(res => {
+      .then((res) => {
         fail(`no request should succeed: ${JSON.stringify(res)}`);
         done();
       })
-      .catch(err => {
+      .catch((err) => {
         expect(err.status).toBe(404);
         expect(err.text).toMatch(
           '{"code":101,"error":"Invalid username/password."}'
@@ -93,7 +93,7 @@ describe('Parse.User testing', () => {
       });
   });
 
-  it('user login with non-string username with REST API (again)', async done => {
+  it('user login with non-string username with REST API (again)', async (done) => {
     await Parse.User.signUp('asdf', 'zxcv');
     request({
       method: 'POST',
@@ -109,11 +109,11 @@ describe('Parse.User testing', () => {
         password: { $regex: '^zx' },
       },
     })
-      .then(res => {
+      .then((res) => {
         fail(`no request should succeed: ${JSON.stringify(res)}`);
         done();
       })
-      .catch(err => {
+      .catch((err) => {
         expect(err.status).toBe(404);
         expect(err.text).toMatch(
           '{"code":101,"error":"Invalid username/password."}'
@@ -122,7 +122,7 @@ describe('Parse.User testing', () => {
       });
   });
 
-  it('user login using POST with REST API', async done => {
+  it('user login using POST with REST API', async (done) => {
     await Parse.User.signUp('some_user', 'some_password');
     request({
       method: 'POST',
@@ -136,17 +136,17 @@ describe('Parse.User testing', () => {
         password: 'some_password',
       },
     })
-      .then(res => {
+      .then((res) => {
         expect(res.data.username).toBe('some_user');
         done();
       })
-      .catch(err => {
+      .catch((err) => {
         fail(`no request should fail: ${JSON.stringify(err)}`);
         done();
       });
   });
 
-  it('user login', async done => {
+  it('user login', async (done) => {
     await Parse.User.signUp('asdf', 'zxcv');
     const user = await Parse.User.logIn('asdf', 'zxcv');
     equal(user.get('username'), 'asdf');
@@ -154,7 +154,7 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('should respect ACL without locking user out', done => {
+  it('should respect ACL without locking user out', (done) => {
     const user = new Parse.User();
     const ACL = new Parse.ACL();
     ACL.setPublicReadAccess(false);
@@ -167,7 +167,7 @@ describe('Parse.User testing', () => {
       .then(() => {
         return Parse.User.logIn('asdf', 'zxcv');
       })
-      .then(user => {
+      .then((user) => {
         equal(user.get('username'), 'asdf');
         const ACL = user.getACL();
         expect(ACL.getReadAccess(user)).toBe(true);
@@ -189,7 +189,7 @@ describe('Parse.User testing', () => {
       .then(() => {
         return Parse.User.logIn('asdf', 'zxcv');
       })
-      .then(user => {
+      .then((user) => {
         equal(user.get('username'), 'asdf');
         const ACL = user.getACL();
         expect(ACL.getReadAccess(user)).toBe(true);
@@ -209,7 +209,7 @@ describe('Parse.User testing', () => {
       });
   });
 
-  it('should let masterKey lockout user', done => {
+  it('should let masterKey lockout user', (done) => {
     const user = new Parse.User();
     const ACL = new Parse.ACL();
     ACL.setPublicReadAccess(false);
@@ -222,7 +222,7 @@ describe('Parse.User testing', () => {
       .then(() => {
         return Parse.User.logIn('asdf', 'zxcv');
       })
-      .then(user => {
+      .then((user) => {
         equal(user.get('username'), 'asdf');
         // Lock the user down
         const ACL = new Parse.ACL();
@@ -234,7 +234,7 @@ describe('Parse.User testing', () => {
         return Parse.User.logIn('asdf', 'zxcv');
       })
       .then(done.fail)
-      .catch(err => {
+      .catch((err) => {
         expect(err.message).toBe('Invalid username/password.');
         expect(err.code).toBe(Parse.Error.OBJECT_NOT_FOUND);
         done();
@@ -325,34 +325,34 @@ describe('Parse.User testing', () => {
     expect(res.data.objectId).not.toEqual(objectId);
   });
 
-  it('user login with files', done => {
+  it('user login with files', (done) => {
     const file = new Parse.File('yolo.txt', [1, 2, 3], 'text/plain');
     file
       .save()
-      .then(file => {
+      .then((file) => {
         return Parse.User.signUp('asdf', 'zxcv', { file: file });
       })
       .then(() => {
         return Parse.User.logIn('asdf', 'zxcv');
       })
-      .then(user => {
+      .then((user) => {
         const fileAgain = user.get('file');
         ok(fileAgain.name());
         ok(fileAgain.url());
         done();
       })
-      .catch(err => {
+      .catch((err) => {
         jfail(err);
         done();
       });
   });
 
-  it('become sends token back', done => {
+  it('become sends token back', (done) => {
     let user = null;
     let sessionToken = null;
 
     Parse.User.signUp('Jason', 'Parse', { code: 'red' })
-      .then(newUser => {
+      .then((newUser) => {
         user = newUser;
         expect(user.get('code'), 'red');
 
@@ -361,7 +361,7 @@ describe('Parse.User testing', () => {
 
         return Parse.User.become(sessionToken);
       })
-      .then(newUser => {
+      .then((newUser) => {
         expect(newUser.id).toEqual(user.id);
         expect(newUser.get('username'), 'Jason');
         expect(newUser.get('code'), 'red');
@@ -371,22 +371,22 @@ describe('Parse.User testing', () => {
         () => {
           done();
         },
-        error => {
+        (error) => {
           jfail(error);
           done();
         }
       );
   });
 
-  it('become', done => {
+  it('become', (done) => {
     let user = null;
     let sessionToken = null;
 
     Promise.resolve()
-      .then(function() {
+      .then(function () {
         return Parse.User.signUp('Jason', 'Parse', { code: 'red' });
       })
-      .then(function(newUser) {
+      .then(function (newUser) {
         equal(Parse.User.current(), newUser);
 
         user = newUser;
@@ -400,7 +400,7 @@ describe('Parse.User testing', () => {
 
         return Parse.User.become(sessionToken);
       })
-      .then(function(newUser) {
+      .then(function (newUser) {
         equal(Parse.User.current(), newUser);
 
         ok(newUser);
@@ -416,31 +416,31 @@ describe('Parse.User testing', () => {
         return Parse.User.become('somegarbage');
       })
       .then(
-        function() {
+        function () {
           // This should have failed actually.
           ok(
             false,
             "Shouldn't have been able to log in with garbage session token."
           );
         },
-        function(error) {
+        function (error) {
           ok(error);
           // Handle the error.
           return Promise.resolve();
         }
       )
       .then(
-        function() {
+        function () {
           done();
         },
-        function(error) {
+        function (error) {
           ok(false, error);
           done();
         }
       );
   });
 
-  it('should not call beforeLogin with become', async done => {
+  it('should not call beforeLogin with become', async (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
 
@@ -456,7 +456,7 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('cannot save non-authed user', async done => {
+  it('cannot save non-authed user', async (done) => {
     let user = new Parse.User();
     user.set({
       password: 'asdf',
@@ -475,13 +475,13 @@ describe('Parse.User testing', () => {
     userAgain = await user.signUp();
     equal(userAgain, user);
     userNotAuthed.set('username', 'changed');
-    userNotAuthed.save().then(fail, err => {
+    userNotAuthed.save().then(fail, (err) => {
       expect(err.code).toEqual(Parse.Error.SESSION_MISSING);
       done();
     });
   });
 
-  it('cannot delete non-authed user', async done => {
+  it('cannot delete non-authed user', async (done) => {
     let user = new Parse.User();
     await user.signUp({
       password: 'asdf',
@@ -506,7 +506,7 @@ describe('Parse.User testing', () => {
     }
   });
 
-  it('cannot saveAll with non-authed user', async done => {
+  it('cannot saveAll with non-authed user', async (done) => {
     let user = new Parse.User();
     await user.signUp({
       password: 'asdf',
@@ -610,7 +610,7 @@ describe('Parse.User testing', () => {
     expect({ failed }).toEqual({ failed: true });
   });
 
-  it('current user', done => {
+  it('current user', (done) => {
     const user = new Parse.User();
     user.set('password', 'asdf');
     user.set('email', 'asdf@example.com');
@@ -635,7 +635,7 @@ describe('Parse.User testing', () => {
       });
   });
 
-  it('user.isCurrent', done => {
+  it('user.isCurrent', (done) => {
     const user1 = new Parse.User();
     const user2 = new Parse.User();
     const user3 = new Parse.User();
@@ -692,7 +692,7 @@ describe('Parse.User testing', () => {
       });
   });
 
-  it('user associations', async done => {
+  it('user associations', async (done) => {
     const child = new TestObject();
     await child.save();
     const user = new Parse.User();
@@ -713,7 +713,7 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('user queries', async done => {
+  it('user queries', async (done) => {
     const user = new Parse.User();
     user.set('password', 'asdf');
     user.set('email', 'asdf@example.com');
@@ -731,23 +731,23 @@ describe('Parse.User testing', () => {
 
   function signUpAll(list, optionsOrCallback) {
     let promise = Promise.resolve();
-    list.forEach(user => {
-      promise = promise.then(function() {
+    list.forEach((user) => {
+      promise = promise.then(function () {
         return user.signUp();
       });
     });
-    promise = promise.then(function() {
+    promise = promise.then(function () {
       return list;
     });
     return promise.then(optionsOrCallback);
   }
 
-  it('contained in user array queries', async done => {
+  it('contained in user array queries', async (done) => {
     const USERS = 4;
     const MESSAGES = 5;
 
     // Make a list of users.
-    const userList = range(USERS).map(function(i) {
+    const userList = range(USERS).map(function (i) {
       const user = new Parse.User();
       user.set('password', 'user_num_' + i);
       user.set('email', 'user_num_' + i + '@example.com');
@@ -755,14 +755,14 @@ describe('Parse.User testing', () => {
       return user;
     });
 
-    signUpAll(userList, async function(users) {
+    signUpAll(userList, async function (users) {
       // Make a list of messages.
       if (!users || users.length != USERS) {
         fail('signupAll failed');
         done();
         return;
       }
-      const messageList = range(MESSAGES).map(function(i) {
+      const messageList = range(MESSAGES).map(function (i) {
         const message = new TestObject();
         message.set('to', users[(i + 1) % USERS]);
         message.set('from', users[i % USERS]);
@@ -782,7 +782,7 @@ describe('Parse.User testing', () => {
     });
   });
 
-  it("saving a user signs them up but doesn't log them in", async done => {
+  it("saving a user signs them up but doesn't log them in", async (done) => {
     const user = new Parse.User();
     await user.save({
       password: 'asdf',
@@ -793,7 +793,7 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('user updates', async done => {
+  it('user updates', async (done) => {
     const user = new Parse.User();
     await user.signUp({
       password: 'asdf',
@@ -818,7 +818,7 @@ describe('Parse.User testing', () => {
     }
   });
 
-  it('count users', async done => {
+  it('count users', async (done) => {
     const james = new Parse.User();
     james.set('username', 'james');
     james.set('password', 'mypass');
@@ -833,21 +833,21 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('user sign up with container class', async done => {
+  it('user sign up with container class', async (done) => {
     await Parse.User.signUp('ilya', 'mypass', { array: ['hello'] });
     done();
   });
 
-  it('user modified while saving', done => {
+  it('user modified while saving', (done) => {
     Parse.Object.disableSingleInstance();
     const user = new Parse.User();
     user.set('username', 'alice');
     user.set('password', 'password');
-    user.signUp().then(function(userAgain) {
+    user.signUp().then(function (userAgain) {
       equal(userAgain.get('username'), 'bob');
       ok(userAgain.dirty('username'));
       const query = new Parse.Query(Parse.User);
-      query.get(user.id).then(freshUser => {
+      query.get(user.id).then((freshUser) => {
         equal(freshUser.id, user.id);
         equal(freshUser.get('username'), 'alice');
         done();
@@ -860,18 +860,18 @@ describe('Parse.User testing', () => {
     });
   });
 
-  it('user modified while saving with unsaved child', done => {
+  it('user modified while saving with unsaved child', (done) => {
     Parse.Object.disableSingleInstance();
     const user = new Parse.User();
     user.set('username', 'alice');
     user.set('password', 'password');
     user.set('child', new TestObject());
-    user.signUp().then(userAgain => {
+    user.signUp().then((userAgain) => {
       equal(userAgain.get('username'), 'bob');
       // Should be dirty, but it depends on batch support.
       // ok(userAgain.dirty("username"));
       const query = new Parse.Query(Parse.User);
-      query.get(user.id).then(freshUser => {
+      query.get(user.id).then((freshUser) => {
         equal(freshUser.id, user.id);
         // Should be alice, but it depends on batch support.
         equal(freshUser.get('username'), 'bob');
@@ -881,7 +881,7 @@ describe('Parse.User testing', () => {
     ok(user.set('username', 'bob'));
   });
 
-  it('user loaded from localStorage from signup', async done => {
+  it('user loaded from localStorage from signup', async (done) => {
     const alice = await Parse.User.signUp('alice', 'password');
     ok(alice.id, 'Alice should have an objectId');
     ok(alice.getSessionToken(), 'Alice should have a session token');
@@ -903,10 +903,10 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('user loaded from localStorage from login', done => {
+  it('user loaded from localStorage from login', (done) => {
     let id;
     Parse.User.signUp('alice', 'password')
-      .then(alice => {
+      .then((alice) => {
         id = alice.id;
         return Parse.User.logOut();
       })
@@ -933,18 +933,18 @@ describe('Parse.User testing', () => {
       });
   });
 
-  it('saving user after browser refresh', done => {
+  it('saving user after browser refresh', (done) => {
     let id;
 
     Parse.User.signUp('alice', 'password', null)
-      .then(function(alice) {
+      .then(function (alice) {
         id = alice.id;
         return Parse.User.logOut();
       })
       .then(() => {
         return Parse.User.logIn('alice', 'password');
       })
-      .then(function() {
+      .then(function () {
         // Simulate browser refresh by force-reloading user from localStorage
         Parse.User._clearCache();
 
@@ -952,7 +952,7 @@ describe('Parse.User testing', () => {
         return Parse.User.current().save({ some_field: 1 });
       })
       .then(
-        function() {
+        function () {
           // Check the user in memory just after save operation
           const userInMemory = Parse.User.current();
 
@@ -1045,14 +1045,14 @@ describe('Parse.User testing', () => {
 
           done();
         },
-        function(error) {
+        function (error) {
           ok(false, error);
           done();
         }
       );
   });
 
-  it('user with missing username', async done => {
+  it('user with missing username', async (done) => {
     const user = new Parse.User();
     user.set('password', 'foo');
     try {
@@ -1064,7 +1064,7 @@ describe('Parse.User testing', () => {
     }
   });
 
-  it('user with missing password', async done => {
+  it('user with missing password', async (done) => {
     const user = new Parse.User();
     user.set('username', 'foo');
     try {
@@ -1076,7 +1076,7 @@ describe('Parse.User testing', () => {
     }
   });
 
-  it('user stupid subclassing', async done => {
+  it('user stupid subclassing', async (done) => {
     const SuperUser = Parse.Object.extend('User');
     const user = new SuperUser();
     user.set('username', 'bob');
@@ -1086,9 +1086,9 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('user signup class method uses subclassing', async done => {
+  it('user signup class method uses subclassing', async (done) => {
     const SuperUser = Parse.User.extend({
-      secret: function() {
+      secret: function () {
         return 1337;
       },
     });
@@ -1099,9 +1099,9 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('user on disk gets updated after save', async done => {
+  it('user on disk gets updated after save', async (done) => {
     Parse.User.extend({
-      isSuper: function() {
+      isSuper: function () {
         return true;
       },
     });
@@ -1117,7 +1117,7 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it("current user isn't dirty", async done => {
+  it("current user isn't dirty", async (done) => {
     const user = await Parse.User.signUp('andrew', 'oppa', {
       style: 'gangnam',
     });
@@ -1129,7 +1129,7 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  const getMockFacebookProviderWithIdToken = function(id, token) {
+  const getMockFacebookProviderWithIdToken = function (id, token) {
     return {
       authData: {
         id: id,
@@ -1142,7 +1142,7 @@ describe('Parse.User testing', () => {
       synchronizedAuthToken: null,
       synchronizedExpiration: null,
 
-      authenticate: function(options) {
+      authenticate: function (options) {
         if (this.shouldError) {
           options.error(this, 'An error occurred');
         } else if (this.shouldCancel) {
@@ -1151,7 +1151,7 @@ describe('Parse.User testing', () => {
           options.success(this, this.authData);
         }
       },
-      restoreAuthentication: function(authData) {
+      restoreAuthentication: function (authData) {
         if (!authData) {
           this.synchronizedUserId = null;
           this.synchronizedAuthToken = null;
@@ -1163,10 +1163,10 @@ describe('Parse.User testing', () => {
         this.synchronizedExpiration = authData.expiration_date;
         return true;
       },
-      getAuthType: function() {
+      getAuthType: function () {
         return 'facebook';
       },
-      deauthenticate: function() {
+      deauthenticate: function () {
         this.loggedOut = true;
         this.restoreAuthentication(null);
       },
@@ -1175,11 +1175,11 @@ describe('Parse.User testing', () => {
 
   // Note that this mocks out client-side Facebook action rather than
   // server-side.
-  const getMockFacebookProvider = function() {
+  const getMockFacebookProvider = function () {
     return getMockFacebookProviderWithIdToken('8675309', 'jenny');
   };
 
-  const getMockMyOauthProvider = function() {
+  const getMockMyOauthProvider = function () {
     return {
       authData: {
         id: '12345',
@@ -1192,7 +1192,7 @@ describe('Parse.User testing', () => {
       synchronizedAuthToken: null,
       synchronizedExpiration: null,
 
-      authenticate: function(options) {
+      authenticate: function (options) {
         if (this.shouldError) {
           options.error(this, 'An error occurred');
         } else if (this.shouldCancel) {
@@ -1201,7 +1201,7 @@ describe('Parse.User testing', () => {
           options.success(this, this.authData);
         }
       },
-      restoreAuthentication: function(authData) {
+      restoreAuthentication: function (authData) {
         if (!authData) {
           this.synchronizedUserId = null;
           this.synchronizedAuthToken = null;
@@ -1213,10 +1213,10 @@ describe('Parse.User testing', () => {
         this.synchronizedExpiration = authData.expiration_date;
         return true;
       },
-      getAuthType: function() {
+      getAuthType: function () {
         return 'myoauth';
       },
-      deauthenticate: function() {
+      deauthenticate: function () {
         this.loggedOut = true;
         this.restoreAuthentication(null);
       },
@@ -1224,12 +1224,12 @@ describe('Parse.User testing', () => {
   };
 
   Parse.User.extend({
-    extended: function() {
+    extended: function () {
       return true;
     },
   });
 
-  it('log in with provider', async done => {
+  it('log in with provider', async (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
     const model = await Parse.User._logInWith('facebook');
@@ -1272,8 +1272,8 @@ describe('Parse.User testing', () => {
     expect(authData.facebook.id).toBeDefined();
   });
 
-  it('user authData should be available in cloudcode (#2342)', async done => {
-    Parse.Cloud.define('checkLogin', req => {
+  it('user authData should be available in cloudcode (#2342)', async (done) => {
+    Parse.Cloud.define('checkLogin', (req) => {
       expect(req.user).not.toBeUndefined();
       expect(Parse.FacebookUtils.isLinked(req.user)).toBe(true);
       return 'ok';
@@ -1296,7 +1296,7 @@ describe('Parse.User testing', () => {
     Parse.Cloud.run('checkLogin').then(done, done);
   });
 
-  it('log in with provider and update token', async done => {
+  it('log in with provider and update token', async (done) => {
     const provider = getMockFacebookProvider();
     const secondProvider = getMockFacebookProviderWithIdToken(
       '8675309',
@@ -1314,18 +1314,18 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('returns authData when authed and logged in with provider (regression test for #1498)', async done => {
+  it('returns authData when authed and logged in with provider (regression test for #1498)', async (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
     const user = await Parse.User._logInWith('facebook');
     const userQuery = new Parse.Query(Parse.User);
-    userQuery.get(user.id).then(user => {
+    userQuery.get(user.id).then((user) => {
       expect(user.get('authData')).not.toBeUndefined();
       done();
     });
   });
 
-  it('only creates a single session for an installation / user pair (#2885)', async done => {
+  it('only creates a single session for an installation / user pair (#2885)', async (done) => {
     Parse.Object.disableSingleInstance();
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
@@ -1336,7 +1336,7 @@ describe('Parse.User testing', () => {
     const query = new Parse.Query('_Session');
     return query
       .find({ useMasterKey: true })
-      .then(results => {
+      .then((results) => {
         expect(results.length).toBe(1);
         expect(results[0].get('sessionToken')).toBe(sessionToken);
         expect(results[0].get('createdWith')).toEqual({
@@ -1348,22 +1348,22 @@ describe('Parse.User testing', () => {
       .catch(done.fail);
   });
 
-  it('log in with provider with files', done => {
+  it('log in with provider with files', (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
     const file = new Parse.File('yolo.txt', [1, 2, 3], 'text/plain');
     file
       .save()
-      .then(file => {
+      .then((file) => {
         const user = new Parse.User();
         user.set('file', file);
         return user._linkWith('facebook', {});
       })
-      .then(user => {
+      .then((user) => {
         expect(user._isLinked('facebook')).toBeTruthy();
         return Parse.User._logInWith('facebook', {});
       })
-      .then(user => {
+      .then((user) => {
         const fileAgain = user.get('file');
         expect(fileAgain.name()).toMatch(/yolo.txt$/);
         expect(fileAgain.url()).toMatch(/yolo.txt$/);
@@ -1374,7 +1374,7 @@ describe('Parse.User testing', () => {
       .catch(done.fail);
   });
 
-  it('log in with provider twice', async done => {
+  it('log in with provider twice', async (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
     const model = await Parse.User._logInWith('facebook');
@@ -1406,7 +1406,7 @@ describe('Parse.User testing', () => {
     }, done.fail);
   });
 
-  it('log in with provider failed', async done => {
+  it('log in with provider failed', async (done) => {
     const provider = getMockFacebookProvider();
     provider.shouldError = true;
     Parse.User._registerAuthenticationProvider(provider);
@@ -1419,7 +1419,7 @@ describe('Parse.User testing', () => {
     }
   });
 
-  it('log in with provider cancelled', async done => {
+  it('log in with provider cancelled', async (done) => {
     const provider = getMockFacebookProvider();
     provider.shouldCancel = true;
     Parse.User._registerAuthenticationProvider(provider);
@@ -1432,12 +1432,12 @@ describe('Parse.User testing', () => {
     }
   });
 
-  it('login with provider should not call beforeSave trigger', async done => {
+  it('login with provider should not call beforeSave trigger', async (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
     await Parse.User._logInWith('facebook');
     Parse.User.logOut().then(async () => {
-      Parse.Cloud.beforeSave(Parse.User, function(req, res) {
+      Parse.Cloud.beforeSave(Parse.User, function (req, res) {
         res.error("Before save shouldn't be called on login");
       });
       await Parse.User._logInWith('facebook');
@@ -1445,7 +1445,7 @@ describe('Parse.User testing', () => {
     });
   });
 
-  it('signup with provider should not call beforeLogin trigger', async done => {
+  it('signup with provider should not call beforeLogin trigger', async (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
 
@@ -1459,12 +1459,12 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('login with provider should call beforeLogin trigger', async done => {
+  it('login with provider should call beforeLogin trigger', async (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
 
     let hit = 0;
-    Parse.Cloud.beforeLogin(req => {
+    Parse.Cloud.beforeLogin((req) => {
       hit++;
       expect(req.object.get('authData')).toBeDefined();
       expect(req.object.get('name')).toBe('tupac shakur');
@@ -1477,7 +1477,7 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('incorrect login with provider should not call beforeLogin trigger', async done => {
+  it('incorrect login with provider should not call beforeLogin trigger', async (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
 
@@ -1497,12 +1497,12 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('login with provider should be blockable by beforeLogin', async done => {
+  it('login with provider should be blockable by beforeLogin', async (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
 
     let hit = 0;
-    Parse.Cloud.beforeLogin(req => {
+    Parse.Cloud.beforeLogin((req) => {
       hit++;
       if (req.object.get('isBanned')) {
         throw new Error('banned account');
@@ -1523,12 +1523,12 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('logout with provider should call afterLogout trigger', async done => {
+  it('logout with provider should call afterLogout trigger', async (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
 
     let userId;
-    Parse.Cloud.afterLogout(req => {
+    Parse.Cloud.afterLogout((req) => {
       expect(req.object.className).toEqual('_Session');
       expect(req.object.id).toBeDefined();
       const user = req.object.get('user');
@@ -1541,7 +1541,7 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('link with provider', async done => {
+  it('link with provider', async (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
     const user = new Parse.User();
@@ -1563,7 +1563,7 @@ describe('Parse.User testing', () => {
 
   // What this means is, only one Parse User can be linked to a
   // particular Facebook account.
-  it('link with provider for already linked user', async done => {
+  it('link with provider for already linked user', async (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
     const user = new Parse.User();
@@ -1628,7 +1628,7 @@ describe('Parse.User testing', () => {
     expect(sessionToken).toBe(become.getSessionToken());
   });
 
-  it('link with provider failed', async done => {
+  it('link with provider failed', async (done) => {
     const provider = getMockFacebookProvider();
     provider.shouldError = true;
     Parse.User._registerAuthenticationProvider(provider);
@@ -1646,7 +1646,7 @@ describe('Parse.User testing', () => {
     }
   });
 
-  it('link with provider cancelled', async done => {
+  it('link with provider cancelled', async (done) => {
     const provider = getMockFacebookProvider();
     provider.shouldCancel = true;
     Parse.User._registerAuthenticationProvider(provider);
@@ -1664,7 +1664,7 @@ describe('Parse.User testing', () => {
     }
   });
 
-  it('unlink with provider', async done => {
+  it('unlink with provider', async (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
     const model = await Parse.User._logInWith('facebook');
@@ -1686,7 +1686,7 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('unlink and link', async done => {
+  it('unlink and link', async (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
     const model = await Parse.User._logInWith('facebook');
@@ -1715,7 +1715,7 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('link multiple providers', async done => {
+  it('link multiple providers', async (done) => {
     const provider = getMockFacebookProvider();
     const mockProvider = getMockMyOauthProvider();
     Parse.User._registerAuthenticationProvider(provider);
@@ -1739,7 +1739,7 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('link multiple providers and updates token', async done => {
+  it('link multiple providers and updates token', async (done) => {
     const provider = getMockFacebookProvider();
     const secondProvider = getMockFacebookProviderWithIdToken(
       '8675309',
@@ -1761,7 +1761,7 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('link multiple providers and update token', async done => {
+  it('link multiple providers and update token', async (done) => {
     const provider = getMockFacebookProvider();
     const mockProvider = getMockMyOauthProvider();
     Parse.User._registerAuthenticationProvider(provider);
@@ -1788,7 +1788,7 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('should fail linking with existing', async done => {
+  it('should fail linking with existing', async (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
     await Parse.User._logInWith('facebook');
@@ -1806,7 +1806,7 @@ describe('Parse.User testing', () => {
     }
   });
 
-  it('should fail linking with existing through REST', async done => {
+  it('should fail linking with existing through REST', async (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
     const model = await Parse.User._logInWith('facebook');
@@ -1821,7 +1821,7 @@ describe('Parse.User testing', () => {
           'Content-Type': 'application/json',
         },
         body: { authData: { facebook: provider.authData } },
-      }).then(response => {
+      }).then((response) => {
         const body = response.data;
         // make sure the location header is properly set
         expect(userId).not.toBeUndefined();
@@ -1834,22 +1834,22 @@ describe('Parse.User testing', () => {
     });
   });
 
-  it('should allow login with old authData token', done => {
+  it('should allow login with old authData token', (done) => {
     const provider = {
       authData: {
         id: '12345',
         access_token: 'token',
       },
-      restoreAuthentication: function() {
+      restoreAuthentication: function () {
         return true;
       },
-      deauthenticate: function() {
+      deauthenticate: function () {
         provider.authData = {};
       },
-      authenticate: function(options) {
+      authenticate: function (options) {
         options.success(this, provider.authData);
       },
-      getAuthType: function() {
+      getAuthType: function () {
         return 'shortLivedAuth';
       },
     };
@@ -1869,28 +1869,28 @@ describe('Parse.User testing', () => {
         () => {
           done();
         },
-        err => {
+        (err) => {
           done.fail(err);
         }
       );
   });
 
-  it('should allow PUT request with stale auth Data', done => {
+  it('should allow PUT request with stale auth Data', (done) => {
     const provider = {
       authData: {
         id: '12345',
         access_token: 'token',
       },
-      restoreAuthentication: function() {
+      restoreAuthentication: function () {
         return true;
       },
-      deauthenticate: function() {
+      deauthenticate: function () {
         provider.authData = {};
       },
-      authenticate: function(options) {
+      authenticate: function (options) {
         options.success(this, provider.authData);
       },
-      getAuthType: function() {
+      getAuthType: function () {
         return 'shortLivedAuth';
       },
     };
@@ -1929,13 +1929,13 @@ describe('Parse.User testing', () => {
         () => {
           done();
         },
-        err => {
+        (err) => {
           done.fail(err);
         }
       );
   });
 
-  it('should properly error when password is missing', async done => {
+  it('should properly error when password is missing', async (done) => {
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
     const user = await Parse.User._logInWith('facebook');
@@ -1954,7 +1954,7 @@ describe('Parse.User testing', () => {
           fail('should not succeed');
           done();
         },
-        err => {
+        (err) => {
           expect(err.code).toBe(Parse.Error.OBJECT_NOT_FOUND);
           expect(err.message).toEqual('Invalid username/password.');
           done();
@@ -1962,8 +1962,8 @@ describe('Parse.User testing', () => {
       );
   });
 
-  it('should have authData in beforeSave and afterSave', async done => {
-    Parse.Cloud.beforeSave('_User', request => {
+  it('should have authData in beforeSave and afterSave', async (done) => {
+    Parse.Cloud.beforeSave('_User', (request) => {
       const authData = request.object.get('authData');
       expect(authData).not.toBeUndefined();
       if (authData) {
@@ -1974,7 +1974,7 @@ describe('Parse.User testing', () => {
       }
     });
 
-    Parse.Cloud.afterSave('_User', request => {
+    Parse.Cloud.afterSave('_User', (request) => {
       const authData = request.object.get('authData');
       expect(authData).not.toBeUndefined();
       if (authData) {
@@ -1991,9 +1991,9 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('set password then change password', done => {
+  it('set password then change password', (done) => {
     Parse.User.signUp('bob', 'barker')
-      .then(bob => {
+      .then((bob) => {
         bob.setPassword('meower');
         return bob.save();
       })
@@ -2001,18 +2001,18 @@ describe('Parse.User testing', () => {
         return Parse.User.logIn('bob', 'meower');
       })
       .then(
-        bob => {
+        (bob) => {
           expect(bob.getUsername()).toEqual('bob');
           done();
         },
-        e => {
+        (e) => {
           console.log(e);
           fail();
         }
       );
   });
 
-  it('authenticated check', async done => {
+  it('authenticated check', async (done) => {
     const user = new Parse.User();
     user.set('username', 'darkhelmet');
     user.set('password', 'onetwothreefour');
@@ -2022,7 +2022,7 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('log in with explicit facebook auth data', async done => {
+  it('log in with explicit facebook auth data', async (done) => {
     await Parse.FacebookUtils.logIn({
       id: '8675309',
       access_token: 'jenny',
@@ -2031,76 +2031,76 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('log in async with explicit facebook auth data', done => {
+  it('log in async with explicit facebook auth data', (done) => {
     Parse.FacebookUtils.logIn({
       id: '8675309',
       access_token: 'jenny',
       expiration_date: new Date().toJSON(),
     }).then(
-      function() {
+      function () {
         done();
       },
-      function(error) {
+      function (error) {
         ok(false, error);
         done();
       }
     );
   });
 
-  it('link with explicit facebook auth data', async done => {
+  it('link with explicit facebook auth data', async (done) => {
     const user = await Parse.User.signUp('mask', 'open sesame');
     Parse.FacebookUtils.link(user, {
       id: '8675309',
       access_token: 'jenny',
       expiration_date: new Date().toJSON(),
-    }).then(done, error => {
+    }).then(done, (error) => {
       jfail(error);
       done();
     });
   });
 
-  it('link async with explicit facebook auth data', async done => {
+  it('link async with explicit facebook auth data', async (done) => {
     const user = await Parse.User.signUp('mask', 'open sesame');
     Parse.FacebookUtils.link(user, {
       id: '8675309',
       access_token: 'jenny',
       expiration_date: new Date().toJSON(),
     }).then(
-      function() {
+      function () {
         done();
       },
-      function(error) {
+      function (error) {
         ok(false, error);
         done();
       }
     );
   });
 
-  it('async methods', done => {
+  it('async methods', (done) => {
     const data = { foo: 'bar' };
 
     Parse.User.signUp('finn', 'human', data)
-      .then(function(user) {
+      .then(function (user) {
         equal(Parse.User.current(), user);
         equal(user.get('foo'), 'bar');
         return Parse.User.logOut();
       })
-      .then(function() {
+      .then(function () {
         return Parse.User.logIn('finn', 'human');
       })
-      .then(function(user) {
+      .then(function (user) {
         equal(user, Parse.User.current());
         equal(user.get('foo'), 'bar');
         return Parse.User.logOut();
       })
-      .then(function() {
+      .then(function () {
         const user = new Parse.User();
         user.set('username', 'jake');
         user.set('password', 'dog');
         user.set('foo', 'baz');
         return user.signUp();
       })
-      .then(function(user) {
+      .then(function (user) {
         equal(user, Parse.User.current());
         equal(user.get('foo'), 'baz');
         user = new Parse.User();
@@ -2108,22 +2108,22 @@ describe('Parse.User testing', () => {
         user.set('password', 'dog');
         return user.logIn();
       })
-      .then(function(user) {
+      .then(function (user) {
         equal(user, Parse.User.current());
         equal(user.get('foo'), 'baz');
         const userAgain = new Parse.User();
         userAgain.id = user.id;
         return userAgain.fetch();
       })
-      .then(function(userAgain) {
+      .then(function (userAgain) {
         equal(userAgain.get('foo'), 'baz');
         done();
       });
   });
 
-  it("querying for users doesn't get session tokens", done => {
+  it("querying for users doesn't get session tokens", (done) => {
     Parse.User.signUp('finn', 'human', { foo: 'bar' })
-      .then(function() {
+      .then(function () {
         return Parse.User.logOut();
       })
       .then(() => {
@@ -2133,7 +2133,7 @@ describe('Parse.User testing', () => {
         user.set('foo', 'baz');
         return user.signUp();
       })
-      .then(function() {
+      .then(function () {
         return Parse.User.logOut();
       })
       .then(() => {
@@ -2141,9 +2141,9 @@ describe('Parse.User testing', () => {
         return query.find({ sessionToken: null });
       })
       .then(
-        function(users) {
+        function (users) {
           equal(users.length, 2);
-          users.forEach(user => {
+          users.forEach((user) => {
             expect(user.getSessionToken()).toBeUndefined();
             ok(
               !user.getSessionToken(),
@@ -2152,14 +2152,14 @@ describe('Parse.User testing', () => {
           });
           done();
         },
-        function(error) {
+        function (error) {
           ok(false, error);
           done();
         }
       );
   });
 
-  it('querying for users only gets the expected fields', done => {
+  it('querying for users only gets the expected fields', (done) => {
     Parse.User.signUp('finn', 'human', { foo: 'bar' }).then(() => {
       request({
         headers: {
@@ -2167,7 +2167,7 @@ describe('Parse.User testing', () => {
           'X-Parse-REST-API-Key': 'rest',
         },
         url: 'http://localhost:8378/1/users',
-      }).then(response => {
+      }).then((response) => {
         const b = response.data;
         expect(b.results.length).toEqual(1);
         const user = b.results[0];
@@ -2177,32 +2177,32 @@ describe('Parse.User testing', () => {
     });
   });
 
-  it("retrieve user data from fetch, make sure the session token hasn't changed", done => {
+  it("retrieve user data from fetch, make sure the session token hasn't changed", (done) => {
     const user = new Parse.User();
     user.setPassword('asdf');
     user.setUsername('zxcv');
     let currentSessionToken = '';
     Promise.resolve()
-      .then(function() {
+      .then(function () {
         return user.signUp();
       })
-      .then(function() {
+      .then(function () {
         currentSessionToken = user.getSessionToken();
         return user.fetch();
       })
       .then(
-        function(u) {
+        function (u) {
           expect(currentSessionToken).toEqual(u.getSessionToken());
           done();
         },
-        function(error) {
+        function (error) {
           ok(false, error);
           done();
         }
       );
   });
 
-  it('user save should fail with invalid email', done => {
+  it('user save should fail with invalid email', (done) => {
     const user = new Parse.User();
     user.set('username', 'teste');
     user.set('password', 'test');
@@ -2212,14 +2212,14 @@ describe('Parse.User testing', () => {
         fail('Should not have been able to save.');
         done();
       },
-      error => {
+      (error) => {
         expect(error.code).toEqual(125);
         done();
       }
     );
   });
 
-  it('user signup should error if email taken', done => {
+  it('user signup should error if email taken', (done) => {
     const user = new Parse.User();
     user.set('username', 'test1');
     user.set('password', 'test');
@@ -2244,7 +2244,7 @@ describe('Parse.User testing', () => {
       );
   });
 
-  it('user cannot update email to existing user', done => {
+  it('user cannot update email to existing user', (done) => {
     const user = new Parse.User();
     user.set('username', 'test1');
     user.set('password', 'test');
@@ -2257,7 +2257,7 @@ describe('Parse.User testing', () => {
         user2.set('password', 'test');
         return user2.signUp();
       })
-      .then(user2 => {
+      .then((user2) => {
         user2.set('email', 'test@test.com');
         return user2.save();
       })
@@ -2272,7 +2272,7 @@ describe('Parse.User testing', () => {
       );
   });
 
-  it('unset user email', done => {
+  it('unset user email', (done) => {
     const user = new Parse.User();
     user.set('username', 'test');
     user.set('password', 'test');
@@ -2286,18 +2286,18 @@ describe('Parse.User testing', () => {
       .then(() => {
         return Parse.User.logIn('test', 'test');
       })
-      .then(user => {
+      .then((user) => {
         expect(user.getEmail()).toBeUndefined();
         done();
       });
   });
 
-  it('create session from user', done => {
+  it('create session from user', (done) => {
     Promise.resolve()
       .then(() => {
         return Parse.User.signUp('finn', 'human', { foo: 'bar' });
       })
-      .then(user => {
+      .then((user) => {
         request({
           method: 'POST',
           headers: {
@@ -2306,7 +2306,7 @@ describe('Parse.User testing', () => {
             'X-Parse-REST-API-Key': 'rest',
           },
           url: 'http://localhost:8378/1/sessions',
-        }).then(response => {
+        }).then((response) => {
           const b = response.data;
           expect(typeof b.sessionToken).toEqual('string');
           expect(typeof b.createdWith).toEqual('object');
@@ -2318,12 +2318,12 @@ describe('Parse.User testing', () => {
       });
   });
 
-  it('user get session from token on signup', done => {
+  it('user get session from token on signup', (done) => {
     Promise.resolve()
       .then(() => {
         return Parse.User.signUp('finn', 'human', { foo: 'bar' });
       })
-      .then(user => {
+      .then((user) => {
         request({
           headers: {
             'X-Parse-Application-Id': 'test',
@@ -2331,7 +2331,7 @@ describe('Parse.User testing', () => {
             'X-Parse-REST-API-Key': 'rest',
           },
           url: 'http://localhost:8378/1/sessions/me',
-        }).then(response => {
+        }).then((response) => {
           const b = response.data;
           expect(typeof b.sessionToken).toEqual('string');
           expect(typeof b.createdWith).toEqual('object');
@@ -2343,7 +2343,7 @@ describe('Parse.User testing', () => {
       });
   });
 
-  it('user get session from token on login', done => {
+  it('user get session from token on login', (done) => {
     Promise.resolve()
       .then(() => {
         return Parse.User.signUp('finn', 'human', { foo: 'bar' });
@@ -2353,7 +2353,7 @@ describe('Parse.User testing', () => {
           return Parse.User.logIn('finn', 'human');
         });
       })
-      .then(user => {
+      .then((user) => {
         request({
           headers: {
             'X-Parse-Application-Id': 'test',
@@ -2361,7 +2361,7 @@ describe('Parse.User testing', () => {
             'X-Parse-REST-API-Key': 'rest',
           },
           url: 'http://localhost:8378/1/sessions/me',
-        }).then(response => {
+        }).then((response) => {
           const b = response.data;
           expect(typeof b.sessionToken).toEqual('string');
           expect(typeof b.createdWith).toEqual('object');
@@ -2373,12 +2373,12 @@ describe('Parse.User testing', () => {
       });
   });
 
-  it('user update session with other field', done => {
+  it('user update session with other field', (done) => {
     Promise.resolve()
       .then(() => {
         return Parse.User.signUp('finn', 'human', { foo: 'bar' });
       })
-      .then(user => {
+      .then((user) => {
         request({
           headers: {
             'X-Parse-Application-Id': 'test',
@@ -2386,7 +2386,7 @@ describe('Parse.User testing', () => {
             'X-Parse-REST-API-Key': 'rest',
           },
           url: 'http://localhost:8378/1/sessions/me',
-        }).then(response => {
+        }).then((response) => {
           const b = response.data;
           request({
             method: 'PUT',
@@ -2404,12 +2404,12 @@ describe('Parse.User testing', () => {
       });
   });
 
-  it('cannot update session if invalid or no session token', done => {
+  it('cannot update session if invalid or no session token', (done) => {
     Promise.resolve()
       .then(() => {
         return Parse.User.signUp('finn', 'human', { foo: 'bar' });
       })
-      .then(user => {
+      .then((user) => {
         request({
           headers: {
             'X-Parse-Application-Id': 'test',
@@ -2417,7 +2417,7 @@ describe('Parse.User testing', () => {
             'X-Parse-REST-API-Key': 'rest',
           },
           url: 'http://localhost:8378/1/sessions/me',
-        }).then(response => {
+        }).then((response) => {
           const b = response.data;
           request({
             method: 'PUT',
@@ -2429,7 +2429,7 @@ describe('Parse.User testing', () => {
             },
             url: 'http://localhost:8378/1/sessions/' + b.objectId,
             body: JSON.stringify({ foo: 'bar' }),
-          }).then(fail, response => {
+          }).then(fail, (response) => {
             const b = response.data;
             expect(b.error).toBe('Invalid session token');
             request({
@@ -2440,7 +2440,7 @@ describe('Parse.User testing', () => {
               },
               url: 'http://localhost:8378/1/sessions/' + b.objectId,
               body: JSON.stringify({ foo: 'bar' }),
-            }).then(fail, response => {
+            }).then(fail, (response) => {
               const b = response.data;
               expect(b.error).toBe('Session token required.');
               done();
@@ -2450,7 +2450,7 @@ describe('Parse.User testing', () => {
       });
   });
 
-  it('get session only for current user', done => {
+  it('get session only for current user', (done) => {
     Promise.resolve()
       .then(() => {
         return Parse.User.signUp('test1', 'test', { foo: 'bar' });
@@ -2458,7 +2458,7 @@ describe('Parse.User testing', () => {
       .then(() => {
         return Parse.User.signUp('test2', 'test', { foo: 'bar' });
       })
-      .then(user => {
+      .then((user) => {
         request({
           headers: {
             'X-Parse-Application-Id': 'test',
@@ -2466,7 +2466,7 @@ describe('Parse.User testing', () => {
             'X-Parse-REST-API-Key': 'rest',
           },
           url: 'http://localhost:8378/1/sessions',
-        }).then(response => {
+        }).then((response) => {
           const b = response.data;
           expect(b.results.length).toEqual(1);
           expect(typeof b.results[0].user).toEqual('object');
@@ -2476,7 +2476,7 @@ describe('Parse.User testing', () => {
       });
   });
 
-  it('delete session by object', done => {
+  it('delete session by object', (done) => {
     Promise.resolve()
       .then(() => {
         return Parse.User.signUp('test1', 'test', { foo: 'bar' });
@@ -2484,7 +2484,7 @@ describe('Parse.User testing', () => {
       .then(() => {
         return Parse.User.signUp('test2', 'test', { foo: 'bar' });
       })
-      .then(user => {
+      .then((user) => {
         request({
           headers: {
             'X-Parse-Application-Id': 'test',
@@ -2492,7 +2492,7 @@ describe('Parse.User testing', () => {
             'X-Parse-REST-API-Key': 'rest',
           },
           url: 'http://localhost:8378/1/sessions',
-        }).then(response => {
+        }).then((response) => {
           const b = response.data;
           let objId;
           try {
@@ -2519,7 +2519,7 @@ describe('Parse.User testing', () => {
                 'X-Parse-REST-API-Key': 'rest',
               },
               url: 'http://localhost:8378/1/sessions',
-            }).then(fail, response => {
+            }).then(fail, (response) => {
               const b = response.data;
               expect(b.code).toEqual(209);
               expect(b.error).toBe('Invalid session token');
@@ -2530,7 +2530,7 @@ describe('Parse.User testing', () => {
       });
   });
 
-  it('cannot delete session if no sessionToken', done => {
+  it('cannot delete session if no sessionToken', (done) => {
     Promise.resolve()
       .then(() => {
         return Parse.User.signUp('test1', 'test', { foo: 'bar' });
@@ -2538,7 +2538,7 @@ describe('Parse.User testing', () => {
       .then(() => {
         return Parse.User.signUp('test2', 'test', { foo: 'bar' });
       })
-      .then(user => {
+      .then((user) => {
         request({
           headers: {
             'X-Parse-Application-Id': 'test',
@@ -2546,7 +2546,7 @@ describe('Parse.User testing', () => {
             'X-Parse-REST-API-Key': 'rest',
           },
           url: 'http://localhost:8378/1/sessions',
-        }).then(response => {
+        }).then((response) => {
           const b = response.data;
           expect(b.results.length).toEqual(1);
           const objId = b.results[0].objectId;
@@ -2557,7 +2557,7 @@ describe('Parse.User testing', () => {
               'X-Parse-REST-API-Key': 'rest',
             },
             url: 'http://localhost:8378/1/sessions/' + objId,
-          }).then(fail, response => {
+          }).then(fail, (response) => {
             const b = response.data;
             expect(b.code).toEqual(209);
             expect(b.error).toBe('Invalid session token');
@@ -2567,11 +2567,11 @@ describe('Parse.User testing', () => {
       });
   });
 
-  it('password format matches hosted parse', done => {
+  it('password format matches hosted parse', (done) => {
     const hashed =
       '$2a$10$8/wZJyEuiEaobBBqzTG.jeY.XSFJd0rzaN//ososvEI4yLqI.4aie';
     passwordCrypto.compare('test', hashed).then(
-      pass => {
+      (pass) => {
         expect(pass).toBe(true);
         done();
       },
@@ -2582,29 +2582,29 @@ describe('Parse.User testing', () => {
     );
   });
 
-  it('changing password clears sessions', done => {
+  it('changing password clears sessions', (done) => {
     let sessionToken = null;
 
     Promise.resolve()
-      .then(function() {
+      .then(function () {
         return Parse.User.signUp('fosco', 'parse');
       })
-      .then(function(newUser) {
+      .then(function (newUser) {
         equal(Parse.User.current(), newUser);
         sessionToken = newUser.getSessionToken();
         ok(sessionToken);
         newUser.set('password', 'facebook');
         return newUser.save();
       })
-      .then(function() {
+      .then(function () {
         return Parse.User.become(sessionToken);
       })
       .then(
-        function() {
+        function () {
           fail('Session should have been invalidated');
           done();
         },
-        function(err) {
+        function (err) {
           expect(err.code).toBe(Parse.Error.INVALID_SESSION_TOKEN);
           expect(err.message).toBe('Invalid session token');
           done();
@@ -2612,43 +2612,43 @@ describe('Parse.User testing', () => {
       );
   });
 
-  it('test parse user become', done => {
+  it('test parse user become', (done) => {
     let sessionToken = null;
     Promise.resolve()
-      .then(function() {
+      .then(function () {
         return Parse.User.signUp('flessard', 'folo', { foo: 1 });
       })
-      .then(function(newUser) {
+      .then(function (newUser) {
         equal(Parse.User.current(), newUser);
         sessionToken = newUser.getSessionToken();
         ok(sessionToken);
         newUser.set('foo', 2);
         return newUser.save();
       })
-      .then(function() {
+      .then(function () {
         return Parse.User.become(sessionToken);
       })
       .then(
-        function(newUser) {
+        function (newUser) {
           equal(newUser.get('foo'), 2);
           done();
         },
-        function() {
+        function () {
           fail('The session should still be valid');
           done();
         }
       );
   });
 
-  it('ensure logout works', done => {
+  it('ensure logout works', (done) => {
     let user = null;
     let sessionToken = null;
 
     Promise.resolve()
-      .then(function() {
+      .then(function () {
         return Parse.User.signUp('log', 'out');
       })
-      .then(newUser => {
+      .then((newUser) => {
         user = newUser;
         sessionToken = user.getSessionToken();
         return Parse.User.logOut();
@@ -2662,14 +2662,14 @@ describe('Parse.User testing', () => {
           fail('Save should have failed.');
           done();
         },
-        e => {
+        (e) => {
           expect(e.code).toEqual(Parse.Error.INVALID_SESSION_TOKEN);
           done();
         }
       );
   });
 
-  it('support user/password signup with empty authData block', done => {
+  it('support user/password signup with empty authData block', (done) => {
     // The android SDK can send an empty authData object along with username and password.
     Parse.User.signUp('artof', 'thedeal', { authData: {} }).then(
       () => {
@@ -2682,7 +2682,7 @@ describe('Parse.User testing', () => {
     );
   });
 
-  it('session expiresAt correct format', async done => {
+  it('session expiresAt correct format', async (done) => {
     await Parse.User.signUp('asdf', 'zxcv');
     request({
       url: 'http://localhost:8378/1/classes/_Session',
@@ -2690,14 +2690,14 @@ describe('Parse.User testing', () => {
         'X-Parse-Application-Id': 'test',
         'X-Parse-Master-Key': 'test',
       },
-    }).then(response => {
+    }).then((response) => {
       const body = response.data;
       expect(body.results[0].expiresAt.__type).toEqual('Date');
       done();
     });
   });
 
-  it('Invalid session tokens are rejected', async done => {
+  it('Invalid session tokens are rejected', async (done) => {
     await Parse.User.signUp('asdf', 'zxcv');
     request({
       url: 'http://localhost:8378/1/classes/AClass',
@@ -2706,7 +2706,7 @@ describe('Parse.User testing', () => {
         'X-Parse-Rest-API-Key': 'rest',
         'X-Parse-Session-Token': 'text',
       },
-    }).then(fail, response => {
+    }).then(fail, (response) => {
       const body = response.data;
       expect(body.code).toBe(209);
       expect(body.error).toBe('Invalid session token');
@@ -2716,7 +2716,7 @@ describe('Parse.User testing', () => {
 
   it_exclude_dbs(['postgres'])(
     'should cleanup null authData keys (regression test for #935)',
-    done => {
+    (done) => {
       const database = Config.get(Parse.applicationId).database;
       database
         .create(
@@ -2736,9 +2736,9 @@ describe('Parse.User testing', () => {
               'X-Parse-Application-Id': 'test',
               'X-Parse-Master-Key': 'test',
             },
-          }).then(res => res.data);
+          }).then((res) => res.data);
         })
-        .then(user => {
+        .then((user) => {
           const authData = user.authData;
           expect(user.username).toEqual('user');
           expect(authData).toBeUndefined();
@@ -2751,38 +2751,41 @@ describe('Parse.User testing', () => {
     }
   );
 
-  it_exclude_dbs(['postgres'])('should not serve null authData keys', done => {
-    const database = Config.get(Parse.applicationId).database;
-    database
-      .create(
-        '_User',
-        {
-          username: 'user',
-          _hashed_password:
-            '$2a$10$8/wZJyEuiEaobBBqzTG.jeY.XSFJd0rzaN//ososvEI4yLqI.4aie',
-          _auth_data_facebook: null,
-        },
-        {}
-      )
-      .then(() => {
-        return new Parse.Query(Parse.User)
-          .equalTo('username', 'user')
-          .first({ useMasterKey: true });
-      })
-      .then(user => {
-        const authData = user.get('authData');
-        expect(user.get('username')).toEqual('user');
-        expect(authData).toBeUndefined();
-        done();
-      })
-      .catch(() => {
-        fail('this should not fail');
-        done();
-      });
-  });
+  it_exclude_dbs(['postgres'])(
+    'should not serve null authData keys',
+    (done) => {
+      const database = Config.get(Parse.applicationId).database;
+      database
+        .create(
+          '_User',
+          {
+            username: 'user',
+            _hashed_password:
+              '$2a$10$8/wZJyEuiEaobBBqzTG.jeY.XSFJd0rzaN//ososvEI4yLqI.4aie',
+            _auth_data_facebook: null,
+          },
+          {}
+        )
+        .then(() => {
+          return new Parse.Query(Parse.User)
+            .equalTo('username', 'user')
+            .first({ useMasterKey: true });
+        })
+        .then((user) => {
+          const authData = user.get('authData');
+          expect(user.get('username')).toEqual('user');
+          expect(authData).toBeUndefined();
+          done();
+        })
+        .catch(() => {
+          fail('this should not fail');
+          done();
+        });
+    }
+  );
 
-  it('should cleanup null authData keys ParseUser update (regression test for #1198, #2252)', done => {
-    Parse.Cloud.beforeSave('_User', req => {
+  it('should cleanup null authData keys ParseUser update (regression test for #1198, #2252)', (done) => {
+    Parse.Cloud.beforeSave('_User', (req) => {
       req.object.set('foo', 'bar');
     });
 
@@ -2803,8 +2806,8 @@ describe('Parse.User testing', () => {
         },
       },
     })
-      .then(response => response.data)
-      .then(user => {
+      .then((response) => response.data)
+      .then((user) => {
         originalSessionToken = user.sessionToken;
         originalUserId = user.objectId;
         // Simulate registration
@@ -2822,11 +2825,11 @@ describe('Parse.User testing', () => {
             username: 'user',
             password: 'password',
           },
-        }).then(response => {
+        }).then((response) => {
           return response.data;
         });
       })
-      .then(user => {
+      .then((user) => {
         expect(typeof user).toEqual('object');
         expect(user.authData).toBeUndefined();
         expect(user.sessionToken).not.toBeUndefined();
@@ -2841,24 +2844,24 @@ describe('Parse.User testing', () => {
             'X-Parse-REST-API-Key': 'rest',
             'Content-Type': 'application/json',
           },
-        }).then(response => {
+        }).then((response) => {
           const body = response.data;
           expect(body.username).toEqual('user');
           expect(body.objectId).toEqual(originalUserId);
           done();
         });
       })
-      .catch(err => {
+      .catch((err) => {
         fail('no request should fail: ' + JSON.stringify(err));
         done();
       });
   });
 
-  it('should send email when upgrading from anon', done => {
+  it('should send email when upgrading from anon', (done) => {
     let emailCalled = false;
     let emailOptions;
     const emailAdapter = {
-      sendVerificationEmail: options => {
+      sendVerificationEmail: (options) => {
         emailOptions = options;
         emailCalled = true;
       },
@@ -2886,7 +2889,7 @@ describe('Parse.User testing', () => {
         },
       },
     })
-      .then(response => {
+      .then((response) => {
         const user = response.data;
         return request({
           method: 'PUT',
@@ -2911,18 +2914,18 @@ describe('Parse.User testing', () => {
         expect(emailOptions.user.get('email')).toEqual('user@email.com');
         done();
       })
-      .catch(err => {
+      .catch((err) => {
         jfail(err);
         fail('no request should fail: ' + JSON.stringify(err));
         done();
       });
   });
 
-  it('should not send email when email is not a string', async done => {
+  it('should not send email when email is not a string', async (done) => {
     let emailCalled = false;
     let emailOptions;
     const emailAdapter = {
-      sendVerificationEmail: options => {
+      sendVerificationEmail: (options) => {
         emailOptions = options;
         emailCalled = true;
       },
@@ -2953,11 +2956,11 @@ describe('Parse.User testing', () => {
         email: { $regex: '^asd' },
       },
     })
-      .then(res => {
+      .then((res) => {
         fail('no request should succeed: ' + JSON.stringify(res));
         done();
       })
-      .catch(err => {
+      .catch((err) => {
         expect(emailCalled).toBeTruthy();
         expect(emailOptions).toBeDefined();
         expect(err.status).toBe(400);
@@ -2968,7 +2971,7 @@ describe('Parse.User testing', () => {
       });
   });
 
-  it('should aftersave with full object', done => {
+  it('should aftersave with full object', (done) => {
     let hit = 0;
     Parse.Cloud.afterSave('_User', (req, res) => {
       hit++;
@@ -2990,8 +2993,8 @@ describe('Parse.User testing', () => {
       });
   });
 
-  it('changes to a user should update the cache', done => {
-    Parse.Cloud.define('testUpdatedUser', req => {
+  it('changes to a user should update the cache', (done) => {
+    Parse.Cloud.define('testUpdatedUser', (req) => {
       expect(req.user.get('han')).toEqual('solo');
       return {};
     });
@@ -3018,7 +3021,7 @@ describe('Parse.User testing', () => {
       );
   });
 
-  it('should fail to become user with expired token', done => {
+  it('should fail to become user with expired token', (done) => {
     let token;
     Parse.User.signUp('auser', 'somepass', null)
       .then(() =>
@@ -3031,7 +3034,7 @@ describe('Parse.User testing', () => {
           },
         })
       )
-      .then(response => {
+      .then((response) => {
         const body = response.data;
         const id = body.results[0].objectId;
         const expiresAt = new Date(new Date().setYear(2015));
@@ -3055,7 +3058,7 @@ describe('Parse.User testing', () => {
           fail('Should not have succeded');
           done();
         },
-        error => {
+        (error) => {
           expect(error.code).toEqual(209);
           expect(error.message).toEqual('Session token is expired.');
           done();
@@ -3064,11 +3067,11 @@ describe('Parse.User testing', () => {
       .catch(done.fail);
   });
 
-  it('should not create extraneous session tokens', done => {
+  it('should not create extraneous session tokens', (done) => {
     const config = Config.get(Parse.applicationId);
     config.database
       .loadSchema()
-      .then(s => {
+      .then((s) => {
         // Lock down the _User class for creation
         return s.addClassIfNotExists('_User', {}, { create: {} });
       })
@@ -3089,7 +3092,7 @@ describe('Parse.User testing', () => {
         return q.find({ useMasterKey: true });
       })
       .then(
-        res => {
+        (res) => {
           // We should have no session created
           expect(res.length).toBe(0);
           done();
@@ -3101,7 +3104,7 @@ describe('Parse.User testing', () => {
       );
   });
 
-  it('should not overwrite username when unlinking facebook user (regression test for #1532)', async done => {
+  it('should not overwrite username when unlinking facebook user (regression test for #1532)', async (done) => {
     Parse.Object.disableSingleInstance();
     const provider = getMockFacebookProvider();
     Parse.User._registerAuthenticationProvider(provider);
@@ -3119,7 +3122,7 @@ describe('Parse.User testing', () => {
     done();
   });
 
-  it('should revoke sessions when converting anonymous user to "normal" user', done => {
+  it('should revoke sessions when converting anonymous user to "normal" user', (done) => {
     request({
       method: 'POST',
       url: 'http://localhost:8378/1/classes/_User',
@@ -3133,9 +3136,9 @@ describe('Parse.User testing', () => {
           anonymous: { id: '00000000-0000-0000-0000-000000000001' },
         },
       },
-    }).then(response => {
+    }).then((response) => {
       const body = response.data;
-      Parse.User.become(body.sessionToken).then(user => {
+      Parse.User.become(body.sessionToken).then((user) => {
         const obj = new Parse.Object('TestObject');
         obj.setACL(new Parse.ACL(user));
         return obj
@@ -3162,7 +3165,7 @@ describe('Parse.User testing', () => {
     });
   });
 
-  it('should not revoke session tokens if the server is configures to not revoke session tokens', done => {
+  it('should not revoke session tokens if the server is configures to not revoke session tokens', (done) => {
     reconfigureServer({ revokeSessionOnPasswordReset: false }).then(() => {
       request({
         method: 'POST',
@@ -3177,9 +3180,9 @@ describe('Parse.User testing', () => {
             anonymous: { id: '00000000-0000-0000-0000-000000000001' },
           },
         },
-      }).then(response => {
+      }).then((response) => {
         const body = response.data;
-        Parse.User.become(body.sessionToken).then(user => {
+        Parse.User.become(body.sessionToken).then((user) => {
           const obj = new Parse.Object('TestObject');
           obj.setACL(new Parse.ACL(user));
           return (
@@ -3200,7 +3203,7 @@ describe('Parse.User testing', () => {
     });
   });
 
-  it('should not fail querying non existing relations', done => {
+  it('should not fail querying non existing relations', (done) => {
     const user = new Parse.User();
     user.set({
       username: 'hello',
@@ -3209,22 +3212,19 @@ describe('Parse.User testing', () => {
     user
       .signUp()
       .then(() => {
-        return Parse.User.current()
-          .relation('relation')
-          .query()
-          .find();
+        return Parse.User.current().relation('relation').query().find();
       })
-      .then(res => {
+      .then((res) => {
         expect(res.length).toBe(0);
         done();
       })
-      .catch(err => {
+      .catch((err) => {
         fail(JSON.stringify(err));
         done();
       });
   });
 
-  it('should not allow updates to emailVerified', done => {
+  it('should not allow updates to emailVerified', (done) => {
     const emailAdapter = {
       sendVerificationEmail: () => {},
       sendPasswordResetEmail: () => Promise.resolve(),
@@ -3248,15 +3248,13 @@ describe('Parse.User testing', () => {
         return user.signUp();
       })
       .then(() => {
-        return Parse.User.current()
-          .set('emailVerified', true)
-          .save();
+        return Parse.User.current().set('emailVerified', true).save();
       })
       .then(() => {
         fail('Should not be able to update emailVerified');
         done();
       })
-      .catch(err => {
+      .catch((err) => {
         expect(err.message).toBe(
           "Clients aren't allowed to manually update email verification."
         );
@@ -3264,7 +3262,7 @@ describe('Parse.User testing', () => {
       });
   });
 
-  it('should not retrieve hidden fields on GET users/me (#3432)', done => {
+  it('should not retrieve hidden fields on GET users/me (#3432)', (done) => {
     const emailAdapter = {
       sendVerificationEmail: () => {},
       sendPasswordResetEmail: () => Promise.resolve(),
@@ -3298,7 +3296,7 @@ describe('Parse.User testing', () => {
           },
         })
       )
-      .then(response => {
+      .then((response) => {
         const res = response.data;
         expect(res.emailVerified).toBe(false);
         expect(res._email_verify_token).toBeUndefined();
@@ -3307,7 +3305,7 @@ describe('Parse.User testing', () => {
       .catch(done.fail);
   });
 
-  it('should not retrieve hidden fields on GET users/id (#3432)', done => {
+  it('should not retrieve hidden fields on GET users/id (#3432)', (done) => {
     const emailAdapter = {
       sendVerificationEmail: () => {},
       sendPasswordResetEmail: () => Promise.resolve(),
@@ -3340,19 +3338,19 @@ describe('Parse.User testing', () => {
           },
         })
       )
-      .then(response => {
+      .then((response) => {
         const res = response.data;
         expect(res.emailVerified).toBe(false);
         expect(res._email_verify_token).toBeUndefined();
         done();
       })
-      .catch(err => {
+      .catch((err) => {
         fail(JSON.stringify(err));
         done();
       });
   });
 
-  it('should not retrieve hidden fields on login (#3432)', done => {
+  it('should not retrieve hidden fields on login (#3432)', (done) => {
     const emailAdapter = {
       sendVerificationEmail: () => {},
       sendPasswordResetEmail: () => Promise.resolve(),
@@ -3385,19 +3383,19 @@ describe('Parse.User testing', () => {
           },
         })
       )
-      .then(response => {
+      .then((response) => {
         const res = response.data;
         expect(res.emailVerified).toBe(false);
         expect(res._email_verify_token).toBeUndefined();
         done();
       })
-      .catch(err => {
+      .catch((err) => {
         fail(JSON.stringify(err));
         done();
       });
   });
 
-  it('should not allow updates to hidden fields', done => {
+  it('should not allow updates to hidden fields', (done) => {
     const emailAdapter = {
       sendVerificationEmail: () => {},
       sendPasswordResetEmail: () => Promise.resolve(),
@@ -3421,24 +3419,22 @@ describe('Parse.User testing', () => {
         return user.signUp();
       })
       .then(() => {
-        return Parse.User.current()
-          .set('_email_verify_token', 'bad')
-          .save();
+        return Parse.User.current().set('_email_verify_token', 'bad').save();
       })
       .then(() => {
         fail('Should not be able to update email verification token');
         done();
       })
-      .catch(err => {
+      .catch((err) => {
         expect(err).toBeDefined();
         done();
       });
   });
 
-  it('should revoke sessions when setting paswword with masterKey (#3289)', done => {
+  it('should revoke sessions when setting paswword with masterKey (#3289)', (done) => {
     let user;
     Parse.User.signUp('username', 'password')
-      .then(newUser => {
+      .then((newUser) => {
         user = newUser;
         user.set('password', 'newPassword');
         return user.save(null, { useMasterKey: true });
@@ -3448,13 +3444,13 @@ describe('Parse.User testing', () => {
         query.equalTo('user', user);
         return query.find({ useMasterKey: true });
       })
-      .then(results => {
+      .then((results) => {
         expect(results.length).toBe(0);
         done();
       }, done.fail);
   });
 
-  xit('should not send a verification email if the user signed up using oauth', done => {
+  xit('should not send a verification email if the user signed up using oauth', (done) => {
     let emailCalledCount = 0;
     const emailAdapter = {
       sendVerificationEmail: () => {
@@ -3476,7 +3472,7 @@ describe('Parse.User testing', () => {
       id: '8675309',
       access_token: 'jenny',
       expiration_date: new Date().toJSON(),
-    }).then(user => {
+    }).then((user) => {
       user.set('email', 'email2@host.com');
       user.save().then(() => {
         expect(emailCalledCount).toBe(0);
@@ -3487,7 +3483,7 @@ describe('Parse.User testing', () => {
     'this test fails.  See: https://github.com/parse-community/parse-server/issues/5097'
   );
 
-  it('should be able to update user with authData passed', done => {
+  it('should be able to update user with authData passed', (done) => {
     let objectId;
     let sessionToken;
 
@@ -3499,7 +3495,7 @@ describe('Parse.User testing', () => {
           'X-Parse-REST-API-Key': 'rest',
           'X-Parse-Session-Token': sessionToken,
         },
-      }).then(response => block(response.data));
+      }).then((response) => block(response.data));
     }
 
     request({
@@ -3515,13 +3511,13 @@ describe('Parse.User testing', () => {
         authData: { anonymous: { id: '00000000-0000-0000-0000-000000000001' } },
       },
     })
-      .then(response => {
+      .then((response) => {
         const body = response.data;
         objectId = body.objectId;
         sessionToken = body.sessionToken;
         expect(sessionToken).toBeDefined();
         expect(objectId).toBeDefined();
-        return validate(user => {
+        return validate((user) => {
           // validate that keys are set on creation
           expect(user.key).toBe('value');
         });
@@ -3547,7 +3543,7 @@ describe('Parse.User testing', () => {
         return request(options);
       })
       .then(() => {
-        return validate(user => {
+        return validate((user) => {
           // validate that keys are set on update
           expect(user.key).toBe('otherValue');
         });
@@ -3559,7 +3555,7 @@ describe('Parse.User testing', () => {
       .catch(done.fail);
   });
 
-  it('can login with email', done => {
+  it('can login with email', (done) => {
     const user = new Parse.User();
     user
       .save({
@@ -3582,7 +3578,7 @@ describe('Parse.User testing', () => {
       .catch(done.fail);
   });
 
-  it('cannot login with email and invalid password', done => {
+  it('cannot login with email and invalid password', (done) => {
     const user = new Parse.User();
     user
       .save({
@@ -3607,7 +3603,7 @@ describe('Parse.User testing', () => {
       .catch(() => done());
   });
 
-  it('can login with email through query string', done => {
+  it('can login with email through query string', (done) => {
     const user = new Parse.User();
     user
       .save({
@@ -3629,7 +3625,7 @@ describe('Parse.User testing', () => {
       .catch(done.fail);
   });
 
-  it('can login when both email and username are passed', done => {
+  it('can login when both email and username are passed', (done) => {
     const user = new Parse.User();
     user
       .save({
@@ -3651,7 +3647,7 @@ describe('Parse.User testing', () => {
       .catch(done.fail);
   });
 
-  it("fails to login when username doesn't match email", done => {
+  it("fails to login when username doesn't match email", (done) => {
     const user = new Parse.User();
     user
       .save({
@@ -3670,13 +3666,13 @@ describe('Parse.User testing', () => {
         return request(options);
       })
       .then(done.fail)
-      .catch(err => {
+      .catch((err) => {
         expect(err.data.error).toEqual('Invalid username/password.');
         done();
       });
   });
 
-  it("fails to login when email doesn't match username", done => {
+  it("fails to login when email doesn't match username", (done) => {
     const user = new Parse.User();
     user
       .save({
@@ -3695,13 +3691,13 @@ describe('Parse.User testing', () => {
         return request(options);
       })
       .then(done.fail)
-      .catch(err => {
+      .catch((err) => {
         expect(err.data.error).toEqual('Invalid username/password.');
         done();
       });
   });
 
-  it('fails to login when email and username are not provided', done => {
+  it('fails to login when email and username are not provided', (done) => {
     const user = new Parse.User();
     user
       .save({
@@ -3720,13 +3716,13 @@ describe('Parse.User testing', () => {
         return request(options);
       })
       .then(done.fail)
-      .catch(err => {
+      .catch((err) => {
         expect(err.data.error).toEqual('username/email is required.');
         done();
       });
   });
 
-  it('allows login when providing email as username', done => {
+  it('allows login when providing email as username', (done) => {
     const user = new Parse.User();
     user
       .save({
@@ -3737,14 +3733,14 @@ describe('Parse.User testing', () => {
       .then(() => {
         return Parse.User.logIn('yo@lo.com', 'yolopass');
       })
-      .then(user => {
+      .then((user) => {
         expect(user.get('username')).toBe('yolo');
       })
       .then(done)
       .catch(done.fail);
   });
 
-  it('handles properly when 2 users share username / email pairs', done => {
+  it('handles properly when 2 users share username / email pairs', (done) => {
     const user = new Parse.User({
       username: 'yo@loname.com',
       password: 'yolopass',
@@ -3760,7 +3756,7 @@ describe('Parse.User testing', () => {
       .then(() => {
         return Parse.User.logIn('yo@loname.com', 'yolopass');
       })
-      .then(user => {
+      .then((user) => {
         // the username takes precedence over the email,
         // so we get the user with username as passed in
         expect(user.get('username')).toBe('yo@loname.com');
@@ -3769,7 +3765,7 @@ describe('Parse.User testing', () => {
       .catch(done.fail);
   });
 
-  it('handles properly when 2 users share username / email pairs, counterpart', done => {
+  it('handles properly when 2 users share username / email pairs, counterpart', (done) => {
     const user = new Parse.User({
       username: 'yo@loname.com',
       password: 'yolopass',
@@ -3786,13 +3782,13 @@ describe('Parse.User testing', () => {
         return Parse.User.logIn('yo@loname.com', 'yolopass2');
       })
       .then(done.fail)
-      .catch(err => {
+      .catch((err) => {
         expect(err.message).toEqual('Invalid username/password.');
         done();
       });
   });
 
-  it('fails to login when password is not provided', done => {
+  it('fails to login when password is not provided', (done) => {
     const user = new Parse.User();
     user
       .save({
@@ -3811,13 +3807,13 @@ describe('Parse.User testing', () => {
         return request(options);
       })
       .then(done.fail)
-      .catch(err => {
+      .catch((err) => {
         expect(err.data.error).toEqual('password is required.');
         done();
       });
   });
 
-  it('does not duplicate session when logging in multiple times #3451', done => {
+  it('does not duplicate session when logging in multiple times #3451', (done) => {
     const user = new Parse.User();
     user
       .signUp({
@@ -3831,7 +3827,7 @@ describe('Parse.User testing', () => {
         let count = 0;
         while (count < 5) {
           promise = promise.then(() => {
-            return Parse.User.logIn('yolo', 'yolo').then(res => {
+            return Parse.User.logIn('yolo', 'yolo').then((res) => {
               // ensure a new session token is generated at each login
               expect(res.getSessionToken()).not.toBe(token);
             });
@@ -3842,7 +3838,7 @@ describe('Parse.User testing', () => {
       })
       .then(() => {
         // wait because session destruction is not synchronous
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           setTimeout(resolve, 100);
         });
       })
@@ -3850,7 +3846,7 @@ describe('Parse.User testing', () => {
         const query = new Parse.Query('_Session');
         return query.find({ useMasterKey: true });
       })
-      .then(results => {
+      .then((results) => {
         // only one session in the end
         expect(results.length).toBe(1);
       })
@@ -3928,10 +3924,10 @@ describe('Parse.User testing', () => {
   });
 });
 
-describe('Security Advisory GHSA-8w3j-g983-8jh5', function() {
+describe('Security Advisory GHSA-8w3j-g983-8jh5', function () {
   it_only_db('mongo')(
     'should validate credentials first and check if account already linked afterwards ()',
-    async done => {
+    async (done) => {
       // Add User to Database with authData
       const database = Config.get(Parse.applicationId).database;
       const collection = await database.adapter._adaptiveCollection('_User');
@@ -3992,5 +3988,143 @@ describe('Security Advisory GHSA-8w3j-g983-8jh5', function() {
     const query = new Parse.Query(Parse.User);
     const user = await query.get('1234ABCDEF', { useMasterKey: true });
     expect(user.get('authData')).toEqual({ custom: { id: 'linkedID' } });
+  });
+});
+
+describe('login as other user', () => {
+  it('allows creating a session for another user with the master key', async (done) => {
+    await Parse.User.signUp('some_user', 'some_password');
+    const userId = Parse.User.current().id;
+    await Parse.User.logOut();
+
+    try {
+      const response = await request({
+        method: 'POST',
+        url: 'http://localhost:8378/1/loginAs',
+        headers: {
+          'X-Parse-Application-Id': Parse.applicationId,
+          'X-Parse-REST-API-Key': 'rest',
+          'X-Parse-Master-Key': 'test',
+        },
+        body: {
+          userId,
+        },
+      });
+
+      expect(response.data.sessionToken).toBeDefined();
+    } catch (err) {
+      fail(`no request should fail: ${JSON.stringify(err)}`);
+      done();
+    }
+
+    const sessionsQuery = new Parse.Query(Parse.Session);
+    const sessionsAfterRequest = await sessionsQuery.find({
+      useMasterKey: true,
+    });
+    expect(sessionsAfterRequest.length).toBe(1);
+
+    done();
+  });
+
+  it('rejects creating a session for another user if the user does not exist', async (done) => {
+    try {
+      await request({
+        method: 'POST',
+        url: 'http://localhost:8378/1/loginAs',
+        headers: {
+          'X-Parse-Application-Id': Parse.applicationId,
+          'X-Parse-REST-API-Key': 'rest',
+          'X-Parse-Master-Key': 'test',
+        },
+        body: {
+          userId: 'bogus-user',
+        },
+      });
+
+      fail('Request should fail without a valid user ID');
+      done();
+    } catch (err) {
+      expect(err.data.code).toBe(Parse.Error.OBJECT_NOT_FOUND);
+      expect(err.data.error).toBe('user not found');
+    }
+
+    const sessionsQuery = new Parse.Query(Parse.Session);
+    const sessionsAfterRequest = await sessionsQuery.find({
+      useMasterKey: true,
+    });
+    expect(sessionsAfterRequest.length).toBe(0);
+
+    done();
+  });
+
+  it('rejects creating a session for another user with invalid parameters', async (done) => {
+    const invalidUserIds = [undefined, null, ''];
+
+    for (const invalidUserId of invalidUserIds) {
+      try {
+        await request({
+          method: 'POST',
+          url: 'http://localhost:8378/1/loginAs',
+          headers: {
+            'X-Parse-Application-Id': Parse.applicationId,
+            'X-Parse-REST-API-Key': 'rest',
+            'X-Parse-Master-Key': 'test',
+          },
+          body: {
+            userId: invalidUserId,
+          },
+        });
+
+        fail('Request should fail without a valid user ID');
+        done();
+      } catch (err) {
+        expect(err.data.code).toBe(Parse.Error.INVALID_VALUE);
+        expect(err.data.error).toBe(
+          'userId must not be empty, null, or undefined'
+        );
+      }
+
+      const sessionsQuery = new Parse.Query(Parse.Session);
+      const sessionsAfterRequest = await sessionsQuery.find({
+        useMasterKey: true,
+      });
+      expect(sessionsAfterRequest.length).toBe(0);
+    }
+
+    done();
+  });
+
+  it('rejects creating a session for another user without the master key', async (done) => {
+    await Parse.User.signUp('some_user', 'some_password');
+    const userId = Parse.User.current().id;
+    await Parse.User.logOut();
+
+    try {
+      await request({
+        method: 'POST',
+        url: 'http://localhost:8378/1/loginAs',
+        headers: {
+          'X-Parse-Application-Id': Parse.applicationId,
+          'X-Parse-REST-API-Key': 'rest',
+        },
+        body: {
+          userId,
+        },
+      });
+
+      fail('Request should fail without the master key');
+      done();
+    } catch (err) {
+      expect(err.data.code).toBe(Parse.Error.OPERATION_FORBIDDEN);
+      expect(err.data.error).toBe('master key is required');
+    }
+
+    const sessionsQuery = new Parse.Query(Parse.Session);
+    const sessionsAfterRequest = await sessionsQuery.find({
+      useMasterKey: true,
+    });
+    expect(sessionsAfterRequest.length).toBe(0);
+
+    done();
   });
 });

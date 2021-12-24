@@ -30,6 +30,28 @@ export class UsersRouter extends ClassesRouter {
   }
 
   /**
+   * After retrieving a user directly from the database, we need to remove the
+   * password from the object (for security), and fix an issue some SDKs have
+   * with null values
+   */
+  _sanitizeAuthData(user) {
+    delete user.password;
+
+    // Sometimes the authData still has null on that keys
+    // https://github.com/parse-community/parse-server/issues/935
+    if (user.authData) {
+      Object.keys(user.authData).forEach((provider) => {
+        if (user.authData[provider] === null) {
+          delete user.authData[provider];
+        }
+      });
+      if (Object.keys(user.authData).length == 0) {
+        delete user.authData;
+      }
+    }
+  }
+
+  /**
    * Validates a password request in login and verifyPassword
    * @param {Object} req The request
    * @returns {Object} User object
@@ -83,7 +105,7 @@ export class UsersRouter extends ClassesRouter {
       }
       return req.config.database
         .find('_User', query)
-        .then(results => {
+        .then((results) => {
           if (!results.length) {
             throw new Parse.Error(
               Parse.Error.OBJECT_NOT_FOUND,
@@ -96,14 +118,14 @@ export class UsersRouter extends ClassesRouter {
             req.config.loggerController.warn(
               "There is a user which email is the same as another user's username, logging in based on username"
             );
-            user = results.filter(user => user.username === username)[0];
+            user = results.filter((user) => user.username === username)[0];
           } else {
             user = results[0];
           }
 
           return passwordCrypto.compare(password, user.password);
         })
-        .then(correct => {
+        .then((correct) => {
           isValidPassword = correct;
           const accountLockoutPolicy = new AccountLockout(user, req.config);
           return accountLockoutPolicy.handleLoginAttempt(isValidPassword);
@@ -145,7 +167,7 @@ export class UsersRouter extends ClassesRouter {
           // Sometimes the authData still has null on that keys
           // https://github.com/parse-community/parse-server/issues/935
           if (user.authData) {
-            Object.keys(user.authData).forEach(provider => {
+            Object.keys(user.authData).forEach((provider) => {
               if (user.authData[provider] === null) {
                 delete user.authData[provider];
               }
@@ -155,9 +177,11 @@ export class UsersRouter extends ClassesRouter {
             }
           }
 
+          this._sanitizeAuthData(user);
+
           return resolve(user);
         })
-        .catch(error => {
+        .catch((error) => {
           return reject(error);
         });
     });
@@ -180,7 +204,7 @@ export class UsersRouter extends ClassesRouter {
         { include: 'user' },
         req.info.clientSDK
       )
-      .then(response => {
+      .then((response) => {
         if (
           !response.results ||
           response.results.length == 0 ||
@@ -267,15 +291,71 @@ export class UsersRouter extends ClassesRouter {
     return { response: user };
   }
 
+  /**
+   * This allows master-key clients to create user sessions without access to
+   * user credentials. This enables systems that can authenticate access another
+   * way (API key, app administrators) to act on a user's behalf.
+   *
+   * We create a new session rather than looking for an existing session; we
+   * want this to work in situations where the user is logged out on all
+   * devices, since this can be used by automated systems acting on the user's
+   * behalf.
+   *
+   * For the moment, we're omitting event hooks and lockout checks, since
+   * immediate use cases suggest /loginAs could be used for semantically
+   * different reasons from /login
+   */
+  async handleLogInAs(req) {
+    if (!req.auth.isMaster) {
+      throw new Parse.Error(
+        Parse.Error.OPERATION_FORBIDDEN,
+        'master key is required'
+      );
+    }
+
+    const userId = req.body.userId || req.query.userId;
+    if (!userId) {
+      throw new Parse.Error(
+        Parse.Error.INVALID_VALUE,
+        'userId must not be empty, null, or undefined'
+      );
+    }
+
+    const queryResults = await req.config.database.find('_User', {
+      objectId: userId,
+    });
+    const user = queryResults[0];
+    if (!user) {
+      throw new Parse.Error(Parse.Error.OBJECT_NOT_FOUND, 'user not found');
+    }
+
+    this._sanitizeAuthData(user);
+
+    const { sessionData, createSession } = Auth.createSession(req.config, {
+      userId: user.objectId,
+      createdWith: {
+        action: 'login',
+        authProvider: 'masterkey',
+      },
+      installationId: req.info.installationId,
+    });
+
+    user.sessionToken = sessionData.sessionToken;
+
+    await createSession();
+
+    return { response: user };
+  }
+
   handleVerifyPassword(req) {
     return this._authenticateUserFromRequest(req)
-      .then(user => {
+      .then((user) => {
         // Remove hidden properties.
         UsersRouter.removeHiddenProperties(user);
 
         return { response: user };
       })
-      .catch(error => {
+      .catch((error) => {
         throw error;
       });
   }
@@ -292,7 +372,7 @@ export class UsersRouter extends ClassesRouter {
           undefined,
           req.info.clientSDK
         )
-        .then(records => {
+        .then((records) => {
           if (records.results && records.results.length) {
             return rest
               .del(
@@ -368,7 +448,7 @@ export class UsersRouter extends ClassesRouter {
           response: {},
         });
       },
-      err => {
+      (err) => {
         if (err.code === Parse.Error.OBJECT_NOT_FOUND) {
           // Return success so that this endpoint can't
           // be used to enumerate valid emails
@@ -399,68 +479,73 @@ export class UsersRouter extends ClassesRouter {
       );
     }
 
-    return req.config.database.find('_User', { email: email }).then(results => {
-      if (!results.length || results.length < 1) {
-        throw new Parse.Error(
-          Parse.Error.EMAIL_NOT_FOUND,
-          `No user found with email ${email}`
-        );
-      }
-      const user = results[0];
+    return req.config.database
+      .find('_User', { email: email })
+      .then((results) => {
+        if (!results.length || results.length < 1) {
+          throw new Parse.Error(
+            Parse.Error.EMAIL_NOT_FOUND,
+            `No user found with email ${email}`
+          );
+        }
+        const user = results[0];
 
-      // remove password field, messes with saving on postgres
-      delete user.password;
+        // remove password field, messes with saving on postgres
+        delete user.password;
 
-      if (user.emailVerified) {
-        throw new Parse.Error(
-          Parse.Error.OTHER_CAUSE,
-          `Email ${email} is already verified.`
-        );
-      }
+        if (user.emailVerified) {
+          throw new Parse.Error(
+            Parse.Error.OTHER_CAUSE,
+            `Email ${email} is already verified.`
+          );
+        }
 
-      const userController = req.config.userController;
-      return userController.regenerateEmailVerifyToken(user).then(() => {
-        userController.sendVerificationEmail(user);
-        return { response: {} };
+        const userController = req.config.userController;
+        return userController.regenerateEmailVerifyToken(user).then(() => {
+          userController.sendVerificationEmail(user);
+          return { response: {} };
+        });
       });
-    });
   }
 
   mountRoutes() {
-    this.route('GET', '/users', req => {
+    this.route('GET', '/users', (req) => {
       return this.handleFind(req);
     });
-    this.route('POST', '/users', req => {
+    this.route('POST', '/users', (req) => {
       return this.handleCreate(req);
     });
-    this.route('GET', '/users/me', req => {
+    this.route('GET', '/users/me', (req) => {
       return this.handleMe(req);
     });
-    this.route('GET', '/users/:objectId', req => {
+    this.route('GET', '/users/:objectId', (req) => {
       return this.handleGet(req);
     });
-    this.route('PUT', '/users/:objectId', req => {
+    this.route('PUT', '/users/:objectId', (req) => {
       return this.handleUpdate(req);
     });
-    this.route('DELETE', '/users/:objectId', req => {
+    this.route('DELETE', '/users/:objectId', (req) => {
       return this.handleDelete(req);
     });
-    this.route('GET', '/login', req => {
+    this.route('GET', '/login', (req) => {
       return this.handleLogIn(req);
     });
-    this.route('POST', '/login', req => {
+    this.route('POST', '/login', (req) => {
       return this.handleLogIn(req);
     });
-    this.route('POST', '/logout', req => {
+    this.route('POST', '/loginAs', (req) => {
+      return this.handleLogInAs(req);
+    });
+    this.route('POST', '/logout', (req) => {
       return this.handleLogOut(req);
     });
-    this.route('POST', '/requestPasswordReset', req => {
+    this.route('POST', '/requestPasswordReset', (req) => {
       return this.handleResetRequest(req);
     });
-    this.route('POST', '/verificationEmailRequest', req => {
+    this.route('POST', '/verificationEmailRequest', (req) => {
       return this.handleVerificationEmailRequest(req);
     });
-    this.route('GET', '/verifyPassword', req => {
+    this.route('GET', '/verifyPassword', (req) => {
       return this.handleVerifyPassword(req);
     });
   }
